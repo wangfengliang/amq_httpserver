@@ -184,13 +184,13 @@ bind_and_listen_addrinfos(struct addrinfo *addrs, bool reuse_port)
 
         SET_SOCKET_OPTION(SOL_SOCKET, SO_REUSEADDR, (int[]){ 1 }, sizeof(int));
 
-#ifndef SO_REUSEPORT
-#define SO_REUSEPORT 15
-#endif
+//#ifndef SO_REUSEPORT
+//#define SO_REUSEPORT 15
+//#endif
         //SET_SOCKET_OPTION_MAY_FAIL(SOL_SOCKET, SO_REUSEPORT,
         //                                        (int[]){ reuse_port }, sizeof(int));
 
-        fprintf(stderr, "%s\n", inet_ntoa(*(struct in_addr*)addr));
+        //fprintf(stderr, "%s\n", inet_ntoa(*(struct in_addr*)addr));
         if (!bind(fd, addr->ai_addr, addr->ai_addrlen))
             return listen_addrinfo(fd, addr);
         perror("bind socket fialed");
@@ -210,7 +210,7 @@ setup_socket_normally(lwan_t *l)
     if (family == AF_UNSPEC)
         lwan_status_critical("Could not parse listener: %s", l->config.listener);
 
-    fprintf(stderr, "%d %s %s %s\n", family, listener, node, port);
+    //fprintf(stderr, "%d %s %s %s\n", family, listener, node, port);
     struct addrinfo *addrs;
     struct addrinfo hints = {
         .ai_family = family,

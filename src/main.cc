@@ -52,7 +52,7 @@ main(void)
     };
     lwan_t l;
     lwan_config_t config ;
-    config.listener = "127.0.0.1:8083";
+    config.listener = (char*)"127.0.0.1:8083";
     config.keep_alive_timeout = 15;
     config.quiet = false;
     config.reuse_port = false;

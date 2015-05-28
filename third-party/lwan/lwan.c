@@ -167,7 +167,8 @@ error:
 static void parse_listener_prefix(config_t *c, config_line_t *l, lwan_t *lwan,
     const lwan_module_t *module)
 {
-    lwan_url_map_t url_map = {0};
+    lwan_url_map_t url_map;
+    memset(&url_map, 0, sizeof(lwan_url_map_t));
     struct hash *hash = hash_str_new(free, free);
     void *handler = NULL;
     char *prefix = strdupa(l->line.value);
@@ -248,11 +249,12 @@ out:
 
 void lwan_set_url_handlers(lwan_t *l, const lwan_url_handler_t *map)
 {
-    int i, sz;
+    unsigned int i, sz;
     const lwan_url_handler_t* p = map;
-    for(sz=0; p->prefix; p++,sz++) NULL;
-    lwan_url_map_t* default_map = (lwan_url_map_t*)malloc((int)sz*sizeof(lwan_url_map_t));
-    memset(default_map, 0, sz*sizeof(lwan_url_map_t));
+    for(sz=0; p && p->prefix; p++) sz++;
+    size_t len = sz*sizeof(lwan_url_map_t);
+    lwan_url_map_t* default_map = (lwan_url_map_t*)malloc(len);
+    memset(default_map, 0, len);
     for(i=0; i<sz; i++) 
     {
         lwan_url_map_t* m = &default_map[i];    

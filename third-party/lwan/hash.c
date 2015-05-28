@@ -82,7 +82,9 @@ static void initialize_odd_constant(void)
 		odd_constant = default_odd_constant;
 	close(fd);
 
+#ifdef SYS_getrandom
 oddify_constant:
+#endif
 	odd_constant |= 1;
 	murmur3_set_seed(odd_constant);
 }

@@ -165,9 +165,10 @@ parse_urlencoded_keyvalues(lwan_request_t *request,
     char *key = helper_value->value;
     char *value = NULL;
     size_t values = 0;
+    char* ch = NULL;
     lwan_key_value_t kvs[256];
 
-    for (char *ch = key; *ch; ch++) {
+    for (ch = key; *ch; ch++) {
         switch (*ch) {
         case '=':
             *ch = '\0';
@@ -313,7 +314,8 @@ parse_headers(struct request_parser_helper *helper, char *buffer, char *buffer_e
         HTTP_HDR_RANGE             = MULTICHAR_CONSTANT_L('R','a','n','g')
     };
 
-    for (char *p = buffer; *p; buffer = ++p) {
+    char* p ;
+    for (p = buffer; *p; buffer = ++p) {
         char *value;
         size_t length;
 
@@ -434,7 +436,8 @@ parse_accept_encoding(lwan_request_t *request, struct request_parser_helper *hel
         ENCODING_GZIP2 = MULTICHAR_CONSTANT(' ','g','z','i')
     };
 
-    for (char *p = helper->accept_encoding.value; p && *p; p++) {
+    char* p ;
+    for (p = helper->accept_encoding.value; p && *p; p++) {
         STRING_SWITCH(p) {
         case ENCODING_DEFL1:
         case ENCODING_DEFL2:
@@ -808,8 +811,9 @@ const char *
 lwan_request_get_remote_address(lwan_request_t *request,
             char buffer[static INET6_ADDRSTRLEN])
 {
-    struct sockaddr_storage sock_addr = { 0 };
+    struct sockaddr_storage sock_addr;
     socklen_t sock_len = sizeof(struct sockaddr_storage);
+    memset(&sock_addr, 0, sock_len);
     if (UNLIKELY(getpeername(request->fd, (struct sockaddr *)&sock_addr, &sock_len) < 0))
         return NULL;
 

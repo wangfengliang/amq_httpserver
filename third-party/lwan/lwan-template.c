@@ -191,7 +191,8 @@ static void *lex_error(struct lexer *lexer, const char *msg, ...)
 static lwan_var_descriptor_t *
 symtab_lookup(struct parser *parser, const char *var_name)
 {
-    for (struct symtab *tab = parser->symtab; tab; tab = tab->next) {
+    struct symtab *tab;
+    for (tab = parser->symtab; tab; tab = tab->next) {
         lwan_var_descriptor_t *var = hash_find(tab->hash, var_name);
         if (var)
             return var;
@@ -480,10 +481,10 @@ static void *unexpected_lexeme(struct item *item)
         item_type_str[item->type], (int)item->value.len, item->value.value);
 }
 
-static void *unexpected_lexeme_or_lex_error(struct item *item, struct item *lex_error)
+static void *unexpected_lexeme_or_lex_error(struct item *item, struct item *lex_error_)
 {
-    if (lex_error && (lex_error->type == ITEM_ERROR || lex_error->type == ITEM_EOF)) {
-        *item = *lex_error;
+    if (lex_error_ && (lex_error_->type == ITEM_ERROR || lex_error_->type == ITEM_EOF)) {
+        *item = *lex_error_;
         return NULL;
     }
 
@@ -617,18 +618,18 @@ static void *parser_end_var_not_empty(struct parser *parser, struct item *item)
 static void *parser_slash(struct parser *parser, struct item *item)
 {
     if (item->type == ITEM_IDENTIFIER) {
-        struct item *next = NULL;
+        struct item *next_ = NULL;
 
-        if (!lex_next(&parser->lexer, &next))
-            return unexpected_lexeme_or_lex_error(item, next);
+        if (!lex_next(&parser->lexer, &next_))
+            return unexpected_lexeme_or_lex_error(item, next_);
 
-        if (next->type == ITEM_RIGHT_META)
+        if (next_->type == ITEM_RIGHT_META)
             return parser_end_iter(parser, item);
 
-        if (next->type == ITEM_QUESTION_MARK)
+        if (next_->type == ITEM_QUESTION_MARK)
             return parser_end_var_not_empty(parser, item);
 
-        return unexpected_lexeme_or_lex_error(item, next);
+        return unexpected_lexeme_or_lex_error(item, next_);
     }
 
     return unexpected_lexeme(item);
@@ -676,22 +677,22 @@ static void *parser_negate_iter(struct parser *parser, struct item *item)
 
 static void *parse_identifier(struct parser *parser, struct item *item)
 {
-    struct item *next = NULL;
+    struct item *next_ = NULL;
 
-    if (!lex_next(&parser->lexer, &next)) {
-        if (next)
-            *item = *next;
+    if (!lex_next(&parser->lexer, &next_)) {
+        if (next_)
+            *item = *next_;
         return NULL;
     }
 
     if (parser->flags & FLAGS_QUOTE) {
-        if (next->type != ITEM_CLOSE_CURLY_BRACE)
+        if (next_->type != ITEM_CLOSE_CURLY_BRACE)
             return error_item(item, "Expecting closing brace");
-        if (!lex_next(&parser->lexer, &next))
-            return unexpected_lexeme_or_lex_error(item, next);
+        if (!lex_next(&parser->lexer, &next_))
+            return unexpected_lexeme_or_lex_error(item, next_);
     }
 
-    if (next->type == ITEM_RIGHT_META) {
+    if (next_->type == ITEM_RIGHT_META) {
         lwan_var_descriptor_t *symbol = symtab_lookup(parser, strndupa(item->value.value, item->value.len));
         if (!symbol) {
             return error_item(item, "Unknown variable: %.*s", (int)item->value.len,
@@ -705,7 +706,7 @@ static void *parse_identifier(struct parser *parser, struct item *item)
         return parser_text;
     }
 
-    if (next->type == ITEM_QUESTION_MARK) {
+    if (next_->type == ITEM_QUESTION_MARK) {
         lwan_var_descriptor_t *symbol = symtab_lookup(parser, strndupa(item->value.value, item->value.len));
         if (!symbol) {
             return error_item(item, "Unknown variable: %.*s", (int)item->value.len,
@@ -713,7 +714,7 @@ static void *parse_identifier(struct parser *parser, struct item *item)
         }
 
         if (!parser_next_is(parser, ITEM_RIGHT_META))
-            return unexpected_lexeme_or_lex_error(item, next);
+            return unexpected_lexeme_or_lex_error(item, next_);
 
         emit_chunk(parser, ACTION_IF_VARIABLE_NOT_EMPTY, 0, symbol);
         parser_push_item(parser, item);
@@ -721,7 +722,7 @@ static void *parse_identifier(struct parser *parser, struct item *item)
         return parser_text;
     }
 
-    return unexpected_lexeme_or_lex_error(item, next);
+    return unexpected_lexeme_or_lex_error(item, next_);
 }
 
 static void *parser_meta(struct parser *parser, struct item *item)
@@ -822,7 +823,8 @@ lwan_append_str_escaped_to_strbuf(strbuf_t *buf, void *ptr)
     if (UNLIKELY(!str))
         return;
 
-    for (const char *p = str; *p; p++) {
+    const char* p ;
+    for (p = str; *p; p++) {
         if (*p == '<')
             strbuf_append_str(buf, "&lt;", 4);
         else if (*p == '>')

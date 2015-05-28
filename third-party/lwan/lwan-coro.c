@@ -148,7 +148,8 @@ coro_entry_point(coro_t *coro, coro_function_t func)
 static void
 coro_run_deferred(coro_t *coro)
 {
-    for (coro_defer_t *defer = coro->defer; defer;) {
+    coro_defer_t *defer;
+    for (defer = coro->defer; defer;) {
         coro_defer_t *tmp = defer;
         defer->func(defer->data1, defer->data2);
         defer = tmp->next;

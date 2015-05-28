@@ -332,9 +332,10 @@ thread_io_loop(void *data)
             death_queue_kill_waiting(&dq);
             break;
         default: /* activity in some of this poller's file descriptor */
+          {
             update_date_cache(t);
-
-            for (struct epoll_event *ep_event = events; n_fds--; ep_event++) {
+            struct epoll_event *ep_event;
+            for (ep_event = events; n_fds--; ep_event++) {
                 lwan_connection_t *conn;
 
                 if (!ep_event->data.ptr) {
@@ -355,6 +356,7 @@ thread_io_loop(void *data)
 
                 death_queue_move_to_last(&dq, conn);
             }
+          }
         }
     }
 
@@ -417,7 +419,8 @@ lwan_thread_init(lwan_t *l)
     if (!l->thread.threads)
         lwan_status_critical("Could not allocate memory for threads");
 
-    for (short i = 0; i < l->thread.count; i++)
+    short i;
+    for (i = 0; i < l->thread.count; i++)
         create_thread(l, &l->thread.threads[i]);
 }
 
@@ -426,7 +429,8 @@ lwan_thread_shutdown(lwan_t *l)
 {
     lwan_status_debug("Shutting down threads");
 
-    for (int i = l->thread.count - 1; i >= 0; i--) {
+    int i; 
+    for (i = l->thread.count - 1; i >= 0; i--) {
         lwan_thread_t *t = &l->thread.threads[i];
 
         /* Closing epoll_fd makes the thread gracefully finish. */
