@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "amp_factory.h"
+#include "amq_factory.h"
 
 SimpleAMPFactory* pFactory = NULL;
 

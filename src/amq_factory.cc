@@ -14,7 +14,7 @@
 #include <cms/TextMessage.h>
 #include <cms/BytesMessage.h>
 
-#include "amp_factory.h"
+#include "amq_factory.h"
 
 using namespace activemq;
 using namespace activemq::core;
